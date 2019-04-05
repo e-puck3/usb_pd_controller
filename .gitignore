@@ -32,6 +32,5 @@
 # Debug files
 *.dSYM/
 
-# ChibiOS build
-.dep/
-build/
+# Macos files
+*.DS_Store
