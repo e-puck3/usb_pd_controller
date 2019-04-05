@@ -28,6 +28,7 @@
 struct pdb_config;
 
 /* DPM callback typedefs */
+typedef void (*pdb_dpm_void_func)(void);
 typedef void (*pdb_dpm_func)(struct pdb_config *);
 typedef bool (*pdb_dpm_eval_cap_func)(struct pdb_config *,
         const union pd_msg *, union pd_msg *);
@@ -45,6 +46,11 @@ typedef bool (*pdb_dpm_tcc_func)(struct pdb_config *, enum fusb_typec_current);
  * required.
  */
 struct pdb_dpm_callbacks {
+
+    /*
+     *  Init the DPM driver 
+     */
+    pdb_dpm_void_func init;
     /*
      * Evaluate the Source_Capabilities, creating a Request in response.
      *
@@ -88,6 +94,11 @@ struct pdb_dpm_callbacks {
      * omitted.
      */
     pdb_dpm_tcc_func evaluate_typec_current;
+    
+    /*
+     * Wait for VBUS to be present. Immediatly returns if already present. 
+     */
+    pdb_dpm_void_func wait_vbus;
 
     /*
      * Called at the start of Power Delivery negotiations.

@@ -24,6 +24,7 @@
 #include <ch.h>
 #include <hal.h>
 
+#define PDB_VBUS_LINE   LINE_PWR_PP_STATE
 
 /*
  * PD Buddy Sink configuration structure

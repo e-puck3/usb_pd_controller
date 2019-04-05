@@ -91,6 +91,11 @@ static int8_t dpm_get_range_fixed_pdo_index(const union pd_msg *caps,
     return -1;
 }
 
+void pdbs_dpm_init(void){
+    /* Enables events on rising edge of VBUS.*/
+    palEnableLineEvent(PDB_VBUS_LINE, PAL_EVENT_MODE_RISING_EDGE);
+}
+
 bool pdbs_dpm_evaluate_capability(struct pdb_config *cfg,
         const union pd_msg *caps, union pd_msg *request)
 {
@@ -371,6 +376,12 @@ bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg,
 
     dpm_data->_capability_match = false;
     return false;
+}
+
+void pdbs_dpm_wait_vbus(void){
+    if(!palReadLine(PDB_VBUS_LINE)){
+        palWaitLineTimeout(PDB_VBUS_LINE, TIME_INFINITE);
+    }
 }
 
 void pdbs_dpm_pd_start(struct pdb_config *cfg)

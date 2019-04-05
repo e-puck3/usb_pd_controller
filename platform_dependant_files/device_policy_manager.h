@@ -46,6 +46,10 @@ struct pdbs_dpm_data {
     int _requested_voltage;
 };
 
+/*
+ * @brief Init the DPM driver
+ */
+void pdbs_dpm_init(void);
 
 /*
  * Create a Request message based on the given Source_Capabilities message.  If
@@ -75,6 +79,10 @@ bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg);
  */
 bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg, enum fusb_typec_current tcc);
 
+/*
+ * @brief Wait for VBus to be present. Immediatly return if already present.
+ */
+void pdbs_dpm_wait_vbus(void);
 /*
  * Indicate that power negotiations are starting.
  */

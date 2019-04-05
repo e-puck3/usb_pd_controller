@@ -27,6 +27,7 @@
 
 void pdb_init(struct pdb_config *cfg)
 {
+    cfg->dpm.init();
     /* Initialize the empty message pool */
     pdb_msg_pool_init();
 
