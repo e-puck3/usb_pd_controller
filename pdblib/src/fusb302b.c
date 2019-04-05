@@ -163,6 +163,31 @@ void fusb_send_hardrst(struct pdb_fusb_config *cfg)
     i2cReleaseBus(cfg->i2cp);
 }
 
+void fusb_update_cc(struct pdb_fusb_config *cfg){
+    i2cAcquireBus(cfg->i2cp);
+
+    /* Measure CC1 */
+    fusb_write_byte(cfg, FUSB_SWITCHES0, 0x07);
+    chThdSleepMicroseconds(250);
+    uint8_t cc1 = fusb_read_byte(cfg, FUSB_STATUS0) & FUSB_STATUS0_BC_LVL;
+
+    /* Measure CC2 */
+    fusb_write_byte(cfg, FUSB_SWITCHES0, 0x0B);
+    chThdSleepMicroseconds(250);
+    uint8_t cc2 = fusb_read_byte(cfg, FUSB_STATUS0) & FUSB_STATUS0_BC_LVL;
+
+    /* Select the correct CC line for BMC signaling; also enable AUTO_CRC */
+    if (cc1 > cc2) {
+        fusb_write_byte(cfg, FUSB_SWITCHES1, 0x25);
+        fusb_write_byte(cfg, FUSB_SWITCHES0, 0x07);
+    } else {
+        fusb_write_byte(cfg, FUSB_SWITCHES1, 0x26);
+        fusb_write_byte(cfg, FUSB_SWITCHES0, 0x0B);
+    }
+    
+    i2cReleaseBus(cfg->i2cp);
+}
+
 void fusb_setup(struct pdb_fusb_config *cfg)
 {
     i2cAcquireBus(cfg->i2cp);

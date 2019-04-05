@@ -289,6 +289,11 @@ void fusb_get_status(struct pdb_fusb_config *cfg, union fusb_status *status);
 enum fusb_typec_current fusb_get_typec_current(struct pdb_fusb_config *cfg);
 
 /*
+ * Test the CC lines and configure the good one to communicate
+ */
+void fusb_update_cc(struct pdb_fusb_config *cfg);
+
+/*
  * Initialization routine for the FUSB302B
  */
 void fusb_setup(struct pdb_fusb_config *);
