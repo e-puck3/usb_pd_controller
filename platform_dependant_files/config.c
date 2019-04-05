@@ -23,14 +23,14 @@
 #include <pd.h>
 
 
-/* Initialize the location of the configuration array.  PDBS_CONFIG_BASE is set
- * in the Makefile. */
-struct pdbs_config *pdbs_config_array = (struct pdbs_config *) PDBS_CONFIG_BASE;
-
-/* The location of the current configuration object.  NULL if not known or
- * there is no current configuration. */
-struct pdbs_config *config_cur = NULL;
-
+static struct pdbs_config pd_config = {
+    .flags    = 0,
+    .v        = 9000,
+    .i        = 200,
+    .vmin     = 12000,
+    .vmax     = 19000,
+    .status   = PDBS_CONFIG_STATUS_VALID,
+};
 
 void pdbs_config_print(BaseSequentialStream *chp, const struct pdbs_config *cfg)
 {
@@ -92,180 +92,21 @@ void pdbs_config_print(BaseSequentialStream *chp, const struct pdbs_config *cfg)
     }
 }
 
-/*
- * Unlock the flash interface
- */
-static void flash_unlock(void)
+void pdbs_config_update(const struct pdbs_config *cfg)
 {
-    /* Wait till no operation is on going */
-    while ((FLASH->SR & FLASH_SR_BSY) != 0) {
-        /* Note: we might want a timeout here */
-    }
-
-    /* Check that the Flash is locked */
-    if ((FLASH->CR & FLASH_CR_LOCK) != 0) {
-        /* Perform unlock sequence */
-        FLASH->KEYR = FLASH_KEY1;
-        FLASH->KEYR = FLASH_KEY2;
-    }
-}
-
-/*
- * Lock the flash interface
- */
-static void flash_lock(void)
-{
-    /* Wait till no operation is on going */
-    while ((FLASH->SR & FLASH_SR_BSY) != 0) {
-        /* Note: we might want a timeout here */
-    }
-
-    /* Check that the Flash is unlocked */
-    if ((FLASH->CR & FLASH_CR_LOCK) == 0) {
-        /* Lock the flash */
-        FLASH->CR |= FLASH_CR_LOCK;
-    }
-}
-
-/*
- * Write one halfword to flash
- */
-static void flash_write_halfword(uint16_t *addr, uint16_t data)
-{
-    /* Set the PG bit in the FLASH_CR register to enable programming */
-    FLASH->CR |= FLASH_CR_PG;
-    /* Perform the data write (half-word) at the desired address */
-    *(__IO uint16_t*)(addr) = data;
-    /* Wait until the BSY bit is reset in the FLASH_SR register */
-    while ((FLASH->SR & FLASH_SR_BSY) != 0) {
-        /* For robust implementation, add here time-out management */
-    }
-    /* Check the EOP flag in the FLASH_SR register */
-    if ((FLASH->SR & FLASH_SR_EOP) != 0) {
-        /* clear it by software by writing it at 1 */
-        FLASH->SR = FLASH_SR_EOP;
-    } else {
-        /* Manage the error cases */
-    }
-    /* Reset the PG Bit to disable programming */
-    FLASH->CR &= ~FLASH_CR_PG;
-}
-
-/*
- * Erase the configuration page, without any locking
- */
-static void flash_erase(void)
-{
-    /* Set the PER bit in the FLASH_CR register to enable page erasing */
-    FLASH->CR |= FLASH_CR_PER;
-    /* Program the FLASH_AR register to select a page to erase */
-    FLASH->AR = (int) pdbs_config_array;
-    /* Set the STRT bit in the FLASH_CR register to start the erasing */
-    FLASH->CR |= FLASH_CR_STRT;
-    /* Wait till no operation is on going */
-    while ((FLASH->SR & FLASH_SR_BSY) != 0) {
-        /* Note: we might want a timeout here */
-    }
-    /* Check the EOP flag in the FLASH_SR register */
-    if ((FLASH->SR & FLASH_SR_EOP) != 0) {
-        /* Clear EOP flag by software by writing EOP at 1 */
-        FLASH->SR = FLASH_SR_EOP;
-    } else {
-        /* Manage the error cases */
-    }
-    /* Reset the PER Bit to disable the page erase */
-    FLASH->CR &= ~FLASH_CR_PER;
-}
-
-void pdbs_config_flash_erase(void)
-{
-    /* Enter a critical zone */
-    chSysLock();
-
-    flash_unlock();
-
-    /* Erase the flash page */
-    flash_erase();
-
-    flash_lock();
-
-    /* There is no configuration now, so update config_cur to reflect this */
-    config_cur = NULL;
-
-    /* Exit the critical zone */
-    chSysUnlock();
-}
-
-void pdbs_config_flash_update(const struct pdbs_config *cfg)
-{
-    /* Enter a critical zone */
-    chSysLock();
-
-    flash_unlock();
-
-    /* If there is an old entry, invalidate it. */
-    struct pdbs_config *old = pdbs_config_flash_read();
-    if (old != NULL) {
-        flash_write_halfword(&(old->status), PDBS_CONFIG_STATUS_INVALID);
-    }
-
-    /* Find the first empty entry */
-    struct pdbs_config *empty = NULL;
-    for (int i = 0; i < PDBS_CONFIG_ARRAY_LEN; i++) {
-        /* If we've found it, return it. */
-        if (pdbs_config_array[i].status == PDBS_CONFIG_STATUS_EMPTY) {
-            empty = &pdbs_config_array[i];
-            break;
-        }
-    }
-    /* If empty is still NULL, the page is full.  Erase it. */
-    if (empty == NULL) {
-        flash_erase();
-        /* Write to the first element */
-        empty = &pdbs_config_array[0];
-    }
+    
 
     /* Write the new configuration */
-    flash_write_halfword(&(empty->status), cfg->status);
-    flash_write_halfword(&(empty->flags), cfg->flags);
-    flash_write_halfword(&(empty->v), cfg->v);
-    flash_write_halfword(&(empty->i), cfg->i);
-    flash_write_halfword(&(empty->vmin), cfg->vmin);
-    flash_write_halfword(&(empty->vmax), cfg->vmax);
+    pd_config.status   = cfg->status;
+    pd_config.flags    = cfg->flags;
+    pd_config.v        = cfg->v;
+    pd_config.i        = cfg->i;
+    pd_config.vmin     = cfg->vmin;
+    pd_config.vmax     = cfg->vmax;
 
-    flash_lock();
-
-    /* Update config_cur for the new configuration */
-    config_cur = empty;
-
-    /* Exit the critical zone */
-    chSysUnlock();
 }
 
-struct pdbs_config *pdbs_config_flash_read(void)
+struct pdbs_config *pdbs_config_read(void)
 {
-    /* If we already know where the configuration is, return its location */
-    if (config_cur != NULL) {
-        return config_cur;
-    }
-
-    /* We don't know where the configuration is (config_cur == NULL), so we
-     * need to find it and store its location if applicable. */
-
-    /* If the first element is empty, there is no valid structure. */
-    if (pdbs_config_array[0].status == PDBS_CONFIG_STATUS_EMPTY) {
-        return NULL;
-    }
-
-    /* Find the valid structure, if there is one. */
-    for (int i = 0; i < PDBS_CONFIG_ARRAY_LEN; i++) {
-        /* If we've found it, return it. */
-        if (pdbs_config_array[i].status == PDBS_CONFIG_STATUS_VALID) {
-            config_cur = &pdbs_config_array[i];
-            return config_cur;
-        }
-    }
-
-    /* If we got to the end, none of the structures is valid. */
-    return NULL;
+    return &pd_config;
 }

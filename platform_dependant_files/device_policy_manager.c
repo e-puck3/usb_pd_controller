@@ -24,8 +24,7 @@
 
 #include <pd.h>
 
-#include "led.h"
-#include "config.h"
+#include "pdb_config.h"
 
 
 /* The current draw when the output is disabled */
@@ -110,7 +109,7 @@ bool pdbs_dpm_evaluate_capability(struct pdb_config *cfg,
     }
 
     /* Get the current configuration */
-    struct pdbs_config *scfg = pdbs_config_flash_read();
+    struct pdbs_config *scfg = pdbs_config_read();
     /* Get the number of PDOs */
     uint8_t numobj = PD_NUMOBJ_GET(caps);
 
@@ -245,7 +244,7 @@ void pdbs_dpm_get_sink_capability(struct pdb_config *cfg, union pd_msg *cap)
     /* Keep track of how many PDOs we've added */
     int numobj = 0;
     /* Get the current configuration */
-    struct pdbs_config *scfg = pdbs_config_flash_read();
+    struct pdbs_config *scfg = pdbs_config_read();
     /* Cast the dpm_data to the right type */
     struct pdbs_dpm_data *dpm_data = cfg->dpm_data;
 
@@ -325,7 +324,7 @@ void pdbs_dpm_get_sink_capability(struct pdb_config *cfg, union pd_msg *cap)
 bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg)
 {
     (void) cfg;
-    struct pdbs_config *scfg = pdbs_config_flash_read();
+    struct pdbs_config *scfg = pdbs_config_read();
 
     return scfg->flags & PDBS_CONFIG_FLAGS_GIVEBACK;
 }
@@ -333,7 +332,7 @@ bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg)
 bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg,
         enum fusb_typec_current tcc)
 {
-    struct pdbs_config *scfg = pdbs_config_flash_read();
+    struct pdbs_config *scfg = pdbs_config_read();
     /* Cast the dpm_data to the right type */
     struct pdbs_dpm_data *dpm_data = cfg->dpm_data;
 

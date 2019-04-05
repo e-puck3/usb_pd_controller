@@ -76,40 +76,20 @@ struct pdbs_config {
 #define PDBS_CONFIG_FLAGS_CURRENT_DEFN_R (2 << PDBS_CONFIG_FLAGS_CURRENT_DEFN_SHIFT)
 
 
-/* Flash configuration array */
-extern struct pdbs_config *pdbs_config_array;
-
-/* The number of elements in the pdbs_config_array */
-#define PDBS_CONFIG_ARRAY_LEN 128
-
-
 /*
  * Print a struct pdbs_config to the given BaseSequentialStream
  */
 void pdbs_config_print(BaseSequentialStream *chp, const struct pdbs_config *cfg);
 
 /*
- * Erase the flash page used for configuration
+ * Write a configuration structure to the config structure
  */
-void pdbs_config_flash_erase(void);
+void pdbs_config_update(const struct pdbs_config *cfg);
 
 /*
- * Write a configuration structure to flash, invalidating the previous
- * configuration.  If necessary, the flash page is erased before writing the
- * new structure.
+ * Get the config structure structure
  */
-void pdbs_config_flash_update(const struct pdbs_config *cfg);
-
-/*
- * Get the first valid configuration strucure.  If the flash page is empty,
- * return NULL instead.
- *
- * The location of the configuration is cached, and the cache is updated when
- * pdbs_config_flash_erase and pdbs_config_flash_update are called.  The full
- * lookup is only performed the first time this function is called, so there's
- * very little penalty to calling it repeatedly.
- */
-struct pdbs_config *pdbs_config_flash_read(void);
+struct pdbs_config *pdbs_config_read(void);
 
 
 #endif /* PDBS_CONFIG_H */
