@@ -76,8 +76,9 @@ static enum policy_engine_state pe_sink_startup(struct pdb_config *cfg)
 static enum policy_engine_state pe_sink_discovery(struct pdb_config *cfg)
 {
     (void) cfg;
-    /* Wait for VBUS.  Since it's our only power source, we already know that
-     * we have it, so just move on. */
+    /* Wait for VBUS. */
+    cfg->dpm.wait_vbus();
+
 
     return PESinkWaitCap;
 }
@@ -332,9 +333,17 @@ static enum policy_engine_state pe_sink_ready(struct pdb_config *cfg)
                 | PDB_EVT_PE_NEW_POWER | PDB_EVT_PE_PPS_REQUEST,
                 PD_T_SINK_REQUEST);
     } else {
-        evt = chEvtWaitAny(PDB_EVT_PE_MSG_RX | PDB_EVT_PE_RESET
+        evt = chEvtWaitAnyTimeout(PDB_EVT_PE_MSG_RX | PDB_EVT_PE_RESET
                 | PDB_EVT_PE_I_OVRTEMP | PDB_EVT_PE_GET_SOURCE_CAP
-                | PDB_EVT_PE_NEW_POWER | PDB_EVT_PE_PPS_REQUEST);
+                | PDB_EVT_PE_NEW_POWER | PDB_EVT_PE_PPS_REQUEST, 
+                PD_T_SINK_REQUEST);
+        /* if no event, we are probably disconnected from the source 
+         * -> wait VBUS and reconfigure the CC lines */
+        if(evt == 0){
+            cfg->dpm.wait_vbus();
+            fusb_update_cc(&cfg->fusb);
+            return PESinkReady;
+        }
     }
 
     /* If we got reset signaling, transition to default */
@@ -783,7 +792,7 @@ static THD_FUNCTION(PolicyEngine, vcfg) {
     chRegSetThreadName("USB_PD-Policy_Engine");
 
     struct pdb_config *cfg = vcfg;
-    enum policy_engine_state state = PESinkStartup;
+    enum policy_engine_state state = PESinkReady;
 
     /* Initialize the mailbox */
     chMBObjectInit(&cfg->pe.mailbox, cfg->pe._mailbox_queue, PDB_MSG_POOL_SIZE);
