@@ -29,14 +29,11 @@
  * Structure for the protocol layer threads and variables
  */
 struct pdb_prl {
-    /* RX thread and working area */
-    THD_WORKING_AREA(_rx_wa, PDB_PRLRX_WA_SIZE);
+    /* RX thread */
     thread_t *rx_thread;
-    /* TX thread and working area */
-    THD_WORKING_AREA(_tx_wa, PDB_PRLTX_WA_SIZE);
+    /* TX thread */
     thread_t *tx_thread;
-    /* Hard reset thread and working area */
-    THD_WORKING_AREA(_hardrst_wa, PDB_HARDRST_WA_SIZE);
+    /* Hard reset thread */
     thread_t *hardrst_thread;
 
     /* TX mailbox for PD messages to be transmitted */

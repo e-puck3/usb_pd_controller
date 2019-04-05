@@ -27,8 +27,7 @@
  * Structure for the INT_N thread
  */
 struct pdb_int_n {
-    /* INT_N thread and working area */
-    THD_WORKING_AREA(_wa, PDB_INT_N_WA_SIZE);
+    /* INT_N thread */
     thread_t *thread;
 };
 

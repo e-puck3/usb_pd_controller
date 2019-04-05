@@ -32,7 +32,10 @@
 /*
  * INT_N polling thread
  */
+static THD_WORKING_AREA(_wa, PDB_INT_N_WA_SIZE);
 static THD_FUNCTION(IntNPoll, vcfg) {
+
+    chRegSetThreadName("USB_PD-Interrupt_manager");
     struct pdb_config *cfg = vcfg;
 
     union fusb_status status;
@@ -85,6 +88,6 @@ static THD_FUNCTION(IntNPoll, vcfg) {
 
 void pdb_int_n_run(struct pdb_config *cfg)
 {
-    cfg->int_n.thread = chThdCreateStatic(cfg->int_n._wa,
-            sizeof(cfg->int_n._wa), PDB_PRIO_PRL_INT_N, IntNPoll, cfg);
+    cfg->int_n.thread = chThdCreateStatic(_wa,
+            sizeof(_wa), PDB_PRIO_PRL_INT_N, IntNPoll, cfg);
 }

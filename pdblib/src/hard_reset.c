@@ -124,7 +124,10 @@ static enum hardrst_state hardrst_complete(struct pdb_config *cfg)
 /*
  * Hard Reset state machine thread
  */
+static THD_WORKING_AREA(_hardrst_wa, PDB_HARDRST_WA_SIZE);
 static THD_FUNCTION(HardReset, cfg) {
+    chRegSetThreadName("USB_PD-HardReset_Manager");
+
     enum hardrst_state state = PRLHRResetLayer;
 
     while (true) {
@@ -160,6 +163,6 @@ static THD_FUNCTION(HardReset, cfg) {
 
 void pdb_hardrst_run(struct pdb_config *cfg)
 {
-    cfg->prl.hardrst_thread = chThdCreateStatic(cfg->prl._hardrst_wa,
-            sizeof(cfg->prl._hardrst_wa), PDB_PRIO_PRL, HardReset, cfg);
+    cfg->prl.hardrst_thread = chThdCreateStatic(_hardrst_wa,
+            sizeof(_hardrst_wa), PDB_PRIO_PRL, HardReset, cfg);
 }

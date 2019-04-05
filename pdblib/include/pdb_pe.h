@@ -38,8 +38,7 @@
  * Structure for Policy Engine thread and variables
  */
 struct pdb_pe {
-    /* Policy Engine thread and working area */
-    THD_WORKING_AREA(_wa, PDB_PE_WA_SIZE);
+    /* Policy Engine thread */
     thread_t *thread;
 
     /* PE mailbox for received PD messages */

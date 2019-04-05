@@ -147,7 +147,11 @@ static enum protocol_rx_state protocol_rx_store_messageid(struct pdb_config *cfg
 /*
  * Protocol layer RX state machine thread
  */
+static THD_WORKING_AREA(_rx_wa, PDB_PRLRX_WA_SIZE);
 static THD_FUNCTION(ProtocolRX, cfg) {
+
+    chRegSetThreadName("USB_PD-Protocol_RX");
+
     enum protocol_rx_state state = PRLRxWaitPHY;
 
     while (true) {
@@ -176,6 +180,6 @@ void pdb_prlrx_run(struct pdb_config *cfg)
 {
     cfg->prl._rx_messageid = -1;
 
-    cfg->prl.rx_thread = chThdCreateStatic(cfg->prl._rx_wa,
-            sizeof(cfg->prl._rx_wa), PDB_PRIO_PRL, ProtocolRX, cfg);
+    cfg->prl.rx_thread = chThdCreateStatic(_rx_wa,
+            sizeof(_rx_wa), PDB_PRIO_PRL, ProtocolRX, cfg);
 }

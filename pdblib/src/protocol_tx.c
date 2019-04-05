@@ -235,7 +235,11 @@ static enum protocol_tx_state protocol_tx_discard_message(struct pdb_config *cfg
 /*
  * Protocol layer TX state machine thread
  */
+static THD_WORKING_AREA(_tx_wa, PDB_PRLTX_WA_SIZE);
 static THD_FUNCTION(ProtocolTX, vcfg) {
+
+    chRegSetThreadName("USB_PD-Protocol_TX");
+
     struct pdb_config *cfg = vcfg;
 
     enum protocol_tx_state state = PRLTxPHYReset;
@@ -282,6 +286,6 @@ static THD_FUNCTION(ProtocolTX, vcfg) {
 
 void pdb_prltx_run(struct pdb_config *cfg)
 {
-    cfg->prl.tx_thread = chThdCreateStatic(cfg->prl._tx_wa,
-            sizeof(cfg->prl._tx_wa), PDB_PRIO_PRL, ProtocolTX, cfg);
+    cfg->prl.tx_thread = chThdCreateStatic(_tx_wa,
+            sizeof(_tx_wa), PDB_PRIO_PRL, ProtocolTX, cfg);
 }

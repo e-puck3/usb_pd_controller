@@ -777,7 +777,11 @@ static enum policy_engine_state pe_sink_source_unresponsive(struct pdb_config *c
 /*
  * Policy Engine state machine thread
  */
+static THD_WORKING_AREA(_wa, PDB_PE_WA_SIZE);
 static THD_FUNCTION(PolicyEngine, vcfg) {
+
+    chRegSetThreadName("USB_PD-Policy_Engine");
+
     struct pdb_config *cfg = vcfg;
     enum policy_engine_state state = PESinkStartup;
 
@@ -858,6 +862,6 @@ static THD_FUNCTION(PolicyEngine, vcfg) {
 
 void pdb_pe_run(struct pdb_config *cfg)
 {
-    cfg->pe.thread = chThdCreateStatic(cfg->pe._wa, sizeof(cfg->pe._wa),
+    cfg->pe.thread = chThdCreateStatic(_wa, sizeof(_wa),
             PDB_PRIO_PE, PolicyEngine, cfg);
 }
