@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @modified by         Eliot Ferragni
+ * @modification date   08.04.2019
+ */
+
 #include "device_policy_manager.h"
 
 #include <stdint.h>

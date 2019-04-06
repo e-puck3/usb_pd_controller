@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @modified by         Eliot Ferragni
+ * @modification date   08.04.2019
+ */
+
 #ifndef PDBS_DEVICE_POLICY_MANAGER_H
 #define PDBS_DEVICE_POLICY_MANAGER_H
 

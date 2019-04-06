@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/**
+ * @modified by         Eliot Ferragni
+ * @modification date   08.04.2019
+ */
+
 #ifndef PDB_INT_N_H
 #define PDB_INT_N_H
 
