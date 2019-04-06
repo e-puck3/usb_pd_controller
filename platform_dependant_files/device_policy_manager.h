@@ -23,7 +23,6 @@
 
 #include <pdb.h>
 
-
 struct pdbs_dpm_data {
     /* The most recently received Source_Capabilities message */
     const union pd_msg *capabilities;
@@ -49,7 +48,7 @@ struct pdbs_dpm_data {
 /*
  * @brief Init the DPM driver
  */
-void pdbs_dpm_init(void);
+void pdbs_dpm_init(struct pdb_config *cfg);
 
 /*
  * Create a Request message based on the given Source_Capabilities message.  If
@@ -82,7 +81,7 @@ bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg, enum fusb_typec_cur
 /*
  * @brief Wait for VBus to be present. Immediatly return if already present.
  */
-void pdbs_dpm_wait_vbus(void);
+void pdbs_dpm_wait_vbus(struct pdb_config *cfg);
 /*
  * Indicate that power negotiations are starting.
  */

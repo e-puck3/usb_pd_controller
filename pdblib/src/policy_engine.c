@@ -77,7 +77,7 @@ static enum policy_engine_state pe_sink_discovery(struct pdb_config *cfg)
 {
     (void) cfg;
     /* Wait for VBUS. */
-    cfg->dpm.wait_vbus();
+    cfg->dpm.wait_vbus(cfg);
 
 
     return PESinkWaitCap;
@@ -340,7 +340,7 @@ static enum policy_engine_state pe_sink_ready(struct pdb_config *cfg)
         /* if no event, we are probably disconnected from the source 
          * -> wait VBUS and reconfigure the CC lines */
         if(evt == 0){
-            cfg->dpm.wait_vbus();
+            cfg->dpm.wait_vbus(cfg);
             fusb_update_cc(&cfg->fusb);
             return PESinkReady;
         }

@@ -100,6 +100,9 @@ struct pdb_config {
     /* Pointer to PD config */
     struct pdbs_config* pd_config;
 
+    /* Line used to detect VBUS */
+    ioline_t vbus_line;
+
     /* Automatically initialized fields */
     /* Policy Engine thread and related variables */
     struct pdb_pe pe;

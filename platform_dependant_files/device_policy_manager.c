@@ -91,9 +91,9 @@ static int8_t dpm_get_range_fixed_pdo_index(const union pd_msg *caps,
     return -1;
 }
 
-void pdbs_dpm_init(void){
+void pdbs_dpm_init(struct pdb_config *cfg){
     /* Enables events on rising edge of VBUS.*/
-    palEnableLineEvent(PDB_VBUS_LINE, PAL_EVENT_MODE_RISING_EDGE);
+    palEnableLineEvent(cfg->vbus_line, PAL_EVENT_MODE_RISING_EDGE);
 }
 
 bool pdbs_dpm_evaluate_capability(struct pdb_config *cfg,
@@ -114,7 +114,7 @@ bool pdbs_dpm_evaluate_capability(struct pdb_config *cfg,
     }
 
     /* Get the current configuration */
-    struct pdbs_config *scfg = pdbs_config_read();
+    struct pdbs_config *scfg = cfg->pd_config;
     /* Get the number of PDOs */
     uint8_t numobj = PD_NUMOBJ_GET(caps);
 
@@ -249,7 +249,7 @@ void pdbs_dpm_get_sink_capability(struct pdb_config *cfg, union pd_msg *cap)
     /* Keep track of how many PDOs we've added */
     int numobj = 0;
     /* Get the current configuration */
-    struct pdbs_config *scfg = pdbs_config_read();
+    struct pdbs_config *scfg = cfg->pd_config;
     /* Cast the dpm_data to the right type */
     struct pdbs_dpm_data *dpm_data = cfg->dpm_data;
 
@@ -329,7 +329,7 @@ void pdbs_dpm_get_sink_capability(struct pdb_config *cfg, union pd_msg *cap)
 bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg)
 {
     (void) cfg;
-    struct pdbs_config *scfg = pdbs_config_read();
+    struct pdbs_config *scfg = cfg->pd_config;
 
     return scfg->flags & PDBS_CONFIG_FLAGS_GIVEBACK;
 }
@@ -337,7 +337,7 @@ bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg)
 bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg,
         enum fusb_typec_current tcc)
 {
-    struct pdbs_config *scfg = pdbs_config_read();
+    struct pdbs_config *scfg = cfg->pd_config;
     /* Cast the dpm_data to the right type */
     struct pdbs_dpm_data *dpm_data = cfg->dpm_data;
 
@@ -378,9 +378,9 @@ bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg,
     return false;
 }
 
-void pdbs_dpm_wait_vbus(void){
-    if(!palReadLine(PDB_VBUS_LINE)){
-        palWaitLineTimeout(PDB_VBUS_LINE, TIME_INFINITE);
+void pdbs_dpm_wait_vbus(struct pdb_config *cfg){
+    if(!palReadLine(cfg->vbus_line)){
+        palWaitLineTimeout(cfg->vbus_line, TIME_INFINITE);
     }
 }
 
