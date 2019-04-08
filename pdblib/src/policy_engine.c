@@ -81,9 +81,6 @@ static enum policy_engine_state pe_sink_startup(struct pdb_config *cfg)
 static enum policy_engine_state pe_sink_discovery(struct pdb_config *cfg)
 {
     (void) cfg;
-    /* Wait for VBUS. */
-    cfg->dpm.wait_vbus(cfg);
-
 
     return PESinkWaitCap;
 }
@@ -330,6 +327,13 @@ static enum policy_engine_state pe_sink_transition_sink(struct pdb_config *cfg)
 static enum policy_engine_state pe_sink_ready(struct pdb_config *cfg)
 {
     eventmask_t evt;
+    static systime_t time = 0;
+    static bool init = true;
+    if(init){
+        init = false;
+        //needed to not directly fall into the case 3 at init
+        time = chVTGetSystemTime() + PD_T_SINK_RECONECT;
+    }
 
     /* Wait for an event */
     if (cfg->pe._min_power) {
@@ -341,14 +345,50 @@ static enum policy_engine_state pe_sink_ready(struct pdb_config *cfg)
         evt = chEvtWaitAnyTimeout(PDB_EVT_PE_MSG_RX | PDB_EVT_PE_RESET
                 | PDB_EVT_PE_I_OVRTEMP | PDB_EVT_PE_GET_SOURCE_CAP
                 | PDB_EVT_PE_NEW_POWER | PDB_EVT_PE_PPS_REQUEST, 
-                PD_T_SINK_REQUEST);
-        /* if no event, we are probably disconnected from the source 
-         * -> wait VBUS and reconfigure the CC lines */
-        if(evt == 0){
+                PD_T_SINK_IDLE);
+    }
+
+    /* If we receive nothing, we have three cases :
+     * 1) we already have a contract and it's normal so we do nothing
+     * 2) we the source is disconnected, so we wait for vbus, then we should receive 
+     * a PDB_EVT_PE_RESET event from the source
+     * 3) we are connected to a source and a contract is already negociated on the source side
+     * but not on our side (it occurs when we reset the microcontroller while still being connected, 
+     * then the source doesn't detect a disconection). Then we ask for the source capabilities
+     * and we are ok again.
+     */ 
+    if(evt == 0){
+        //case 2
+        //we are disconected
+        if(!cfg->dpm.check_vbus(cfg)){
+            // we are disconnected so update the status
+            cfg->pe._explicit_contract = false;
+            //wait vbus
             cfg->dpm.wait_vbus(cfg);
+            /* we need to configure again the CC lines in order to receive the PDB_EVT_PE_RESET
+             * event from the source 
+             */
             fusb_update_cc(&cfg->fusb);
-            return PESinkReady;
+            time = chVTGetSystemTime() + PD_T_SINK_RECONECT;
         }
+        //we are connected
+        else{
+            if(chVTGetSystemTime() > time){
+                //case 3
+                //if we fall here, it means that we didn't receive a PDB_EVT_PE_RESET, so we can
+                //send a PDB_EVT_PE_GET_SOURCE_CAP
+                if(cfg->pe._explicit_contract == false){
+                    fusb_update_cc(&cfg->fusb);
+                    chEvtSignal(cfg->pe.thread, PDB_EVT_PE_GET_SOURCE_CAP);
+                    time = chVTGetSystemTime() + PD_T_SINK_RECONECT;
+                }
+                // case 1
+                else{
+                    time = chVTGetSystemTime() + PD_T_SINK_RECONECT;
+                }
+            }
+        }
+        return PESinkReady;
     }
 
     /* If we got reset signaling, transition to default */
@@ -811,6 +851,8 @@ static THD_FUNCTION(PolicyEngine, vcfg) {
     cfg->pe._last_pps = 8;
     /* Initialize the PD message header template */
     cfg->pe.hdr_template = PD_DATAROLE_UFP | PD_POWERROLE_SINK;
+
+    cfg->pe._min_power = false;
 
     while (true) {
         switch (state) {

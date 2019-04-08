@@ -284,6 +284,8 @@
 #define PD_T_PS_TRANSITION TIME_MS2I(500)
 #define PD_T_SENDER_RESPONSE TIME_MS2I(27)
 #define PD_T_SINK_REQUEST TIME_MS2I(100)
+#define PD_T_SINK_IDLE TIME_MS2I(500)
+#define PD_T_SINK_RECONECT TIME_MS2I(1000)
 #define PD_T_TYPEC_SINK_WAIT_CAP TIME_MS2I(465)
 #define PD_T_PPS_REQUEST TIME_S2I(10)
 /* This is actually from Type-C, not Power Delivery, but who cares? */
