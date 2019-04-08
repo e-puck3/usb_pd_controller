@@ -33,6 +33,7 @@
 struct pdb_config;
 
 /* DPM callback typedefs */
+typedef bool (*pdb_dpm_bool_func)(struct pdb_config *);
 typedef void (*pdb_dpm_func)(struct pdb_config *);
 typedef bool (*pdb_dpm_eval_cap_func)(struct pdb_config *,
         const union pd_msg *, union pd_msg *);
@@ -98,6 +99,11 @@ struct pdb_dpm_callbacks {
      * omitted.
      */
     pdb_dpm_tcc_func evaluate_typec_current;
+
+     /*
+     * Check if VBUS is present or not. 
+     */
+    pdb_dpm_bool_func check_vbus;
     
     /*
      * Wait for VBUS to be present. Immediatly returns if already present. 

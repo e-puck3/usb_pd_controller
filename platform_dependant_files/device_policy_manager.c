@@ -376,8 +376,12 @@ bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg,
     return false;
 }
 
+bool pdbs_dpm_check_vbus(struct pdb_config *cfg){
+    return palReadLine(cfg->vbus_line);
+}
+
 void pdbs_dpm_wait_vbus(struct pdb_config *cfg){
-    if(!palReadLine(cfg->vbus_line)){
+    if(!pdbs_dpm_check_vbus(cfg)){
         palWaitLineTimeout(cfg->vbus_line, TIME_INFINITE);
     }
 }

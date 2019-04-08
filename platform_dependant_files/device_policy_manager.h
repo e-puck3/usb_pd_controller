@@ -84,7 +84,13 @@ bool pdbs_dpm_giveback_enabled(struct pdb_config *cfg);
 bool pdbs_dpm_evaluate_typec_current(struct pdb_config *cfg, enum fusb_typec_current tcc);
 
 /*
- * @brief Wait for VBus to be present. Immediatly return if already present.
+ * Check if VBUS is present or not.
+ * 
+ * Returns true if present, false otherwise.
+ */
+bool pdbs_dpm_check_vbus(struct pdb_config *cfg);
+/*
+ * Wait for VBus to be present. Immediatly return if already present.
  */
 void pdbs_dpm_wait_vbus(struct pdb_config *cfg);
 /*
