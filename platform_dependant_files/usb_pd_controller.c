@@ -208,7 +208,11 @@ bool usbPDControllerIsPowerReady(void){
 }
 
 bool usbPDControllerIsContract(void){
-    return dpm_data._capability_match;
+    if(pdb_config.pe._explicit_contract){
+        return dpm_data._capability_match;
+    }else{
+        return false;
+    }
 }
 
 uint16_t usbPDControllerGetNegociatedVoltage(void){
