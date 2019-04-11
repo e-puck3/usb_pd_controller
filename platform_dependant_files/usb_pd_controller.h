@@ -12,7 +12,7 @@
 /**
  * @brief 	Inits the PD Buddy library (also configures the I2C used).
  */
-void usbPDControllerInit(void);
+void usbPDControllerStart(void);
 
 /**
  * @brief 	Tells if we have an USB PD power conencted and ready.

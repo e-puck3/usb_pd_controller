@@ -197,7 +197,7 @@ static void print_src_pdo(BaseSequentialStream *chp, uint32_t pdo, uint8_t index
 
 /********************                PUBLIC FUNCTIONS              ********************/
 
-void usbPDControllerInit(void){
+void usbPDControllerStart(void){
 	i2cStart(pdb_config.fusb.i2cp, &i2c2config);
 	pdb_init(&pdb_config);
 }
