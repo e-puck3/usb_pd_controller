@@ -1,9 +1,25 @@
+USB PD Controller for ChibiOS
+=============================
+
+Files description
+-----------------
+Here is a list of the important files contained in the **platform_dependant_files** folder :
+
+- **device_policy_manager.c/.h** --Files containing part of the machine state of the pd controller. It's mainly here that its behavior can be modified if needed.
+- **usb_pd_controller.c** --The top of this file contains the configuration of the various parts of the pd controller. The user has check and modify some settings like the GPIO lines used or the I2C configuration for example
+- **usb_pd_controller.h** --Contains the declarations of the function meant to be used by the user. All the others functions findables in other files are meant to be used internally.
+
+
+Build instructions
+------------------
 The modifications made to the pd-buddy library let people use it as a submodule for their project using ChibiOS.
 In order to use it, you need to :
 
-1) Add these lines somewhere in the makefile in the same manner you would do with components of ChibiOS. The path should link to the pdblib folder and is referenced from your makefile
-
-PDBLIB = path_to_pdblib
-include $(PDBLIB)/pdblib.mk
-
-2) Copy the device_policy_manager.c/.h and usb_pd_controller.c/.h to your project and don't forget to include them to your makefile. These files are platform dependant so you will have to change some settings. The high level functions are located in the usb_pd_controller files.
+- Add the specific variables below to your makefile before the **CSRC** definition
+  - ``PDBLIB`` : Path to the **pdblib** folder (relative to the ChibiOS makefile)
+  - ``include $(PDBLIB)/pdblib.mk``
+- Add these variables in your makefile if it's not already the case
+	-	``$(ALLCSRC)`` 	to 	``CSRC``
+	-	``$(ALLINC)`` 	to 	``INCDIR``
+- Copy the **device_policy_manager.c/.h** and **usb_pd_controller.c/.h** files to your project and don't forget to include them in your makefile. These files are platform dependant so you will have to change some settings. The high level functions are located in the **usb_pd_controller.c/.h** files.
+- Finally, include **usb_pd_controller.h** in your C code in order to use the library.
