@@ -9,6 +9,8 @@
 #ifndef USB_PD_CONTROLLER_H
 #define USB_PD_CONTROLLER_H
 
+/********************                PUBLIC FUNCTIONS              ********************/
+
 /**
  * @brief 	Inits the PD Buddy library (also configures the I2C used).
  */
@@ -98,5 +100,80 @@ void usbPDControllerPrintSrcPDO(BaseSequentialStream *chp);
  * @param 	The stream to which we want to write.
  */
 void usbPDControllerPrintConfig(BaseSequentialStream *chp);
+
+/********************                SHELL FUNCTIONS               ********************/
+
+/**     
+ * @brief 			Shell command to print the source capabilities
+ * 					Calls usbPDControllerPrintSrcPDO()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_get_source_cap(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to print the actual config
+ * 					Calls usbPDControllerPrintConfig()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_get_cfg(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to set the wanted voltage
+ * 					Calls usbPDControllerSetFixedVoltage()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_set_v(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to set the wanted voltage range
+ * 					Calls usbPDControllerSetRangeVoltage()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_set_vrange(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to set the current wanted
+ * 					Calls usbPDControllerSetFixedCurrent()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_set_i(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to set the hv_prefered setting
+ * 					Calls usbPDControllerSetHVPrefered()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_hv_prefered(BaseSequentialStream *chp, int argc, char *argv[]);
+/**     
+ * @brief 			Shell command to print if a contract is made and the actual voltage
+ * 					Calls usbPDControllerIsContract() and usbPDControllerGetNegociatedVoltage()
+ * 	
+ * @param chp 		Pointer to the BaseSequentialStream stream to write to
+ * @param argc 		Number of arguments given when calling this shell command
+ * @param argv 		Array of the arguments given when calling thos shell command
+ */	
+void cmd_pd_get_contract(BaseSequentialStream *chp, int argc, char *argv[]);
+
+#define USB_PD_CONTROLLER_SHELL_CMD					\
+	{"pd_get_source_cap", cmd_pd_get_source_cap},	\
+	{"pd_get_cfg", cmd_pd_get_cfg},					\
+	{"pd_set_v", cmd_pd_set_v},						\
+	{"pd_set_vrange", cmd_pd_set_vrange},			\
+	{"pd_set_i", cmd_pd_set_i},						\
+	{"pd_hv_prefered", cmd_pd_hv_prefered},			\
+	{"pd_get_contract", cmd_pd_get_contract},		\
 
 #endif /* USB_PD_CONTROLLER_H */

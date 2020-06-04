@@ -14,6 +14,8 @@
 
 #include <usb_pd_controller.h>
 #include "chprintf.h"
+#include "shell.h"
+#include "stdlib.h"
 
 
 /********************            CONFIGURATION VARIABLES           ********************/
@@ -371,5 +373,128 @@ void usbPDControllerPrintConfig(BaseSequentialStream *chp)
             chprintf(chp, "r: %d.%02d \316\251\r\n", PD_CO_O(pd_config.r), PD_CO_CO(pd_config.r));
             break;
     }
+}
+
+/********************                SHELL FUNCTIONS               ********************/
+
+void cmd_pd_get_source_cap(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    if (argc > 0) {
+        shellUsage(chp, "pd_get_source_cap");
+        return;
+    }
+
+    usbPDControllerPrintSrcPDO(chp);
+}
+
+void cmd_pd_get_cfg(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    if (argc > 0) {
+        shellUsage(chp, "pd_get_cfg");
+        return;
+    }
+
+    usbPDControllerPrintConfig(chp);
+}
+
+void cmd_pd_set_v(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    bool err = false;
+    if (argc != 1) {
+        shellUsage(chp, "pd_set_v voltage_in_mV");
+        return;
+    }
+
+    char *endptr;
+    uint16_t voltage = strtol(argv[0], &endptr, 0);
+
+    if(endptr <= argv[0]){
+        err = true;
+    }else{
+        err = !usbPDControllerSetFixedVoltage(voltage);
+    }
+
+    if(err){
+        chprintf(chp, "Invalid voltage\r\n");
+    } 
+}
+
+void cmd_pd_set_vrange(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    bool err = false;
+    if (argc != 2) {
+        shellUsage(chp, "pd_set_vrange min_voltage_in_mV max_voltage_in_mV");
+        return;
+    }
+
+    char *endptr_min;
+    char *endptr_max;
+    uint16_t vmin = strtol(argv[0], &endptr_min, 0);
+    uint16_t vmax = strtol(argv[1], &endptr_max, 0);
+
+    if(endptr_min <= argv[0] || endptr_max <= argv[1]){
+        err = true;
+    }else{
+        err = !usbPDControllerSetRangeVoltage(vmin, vmax);
+    }
+
+    if(err){
+        chprintf(chp, "Invalid voltages\r\n");
+    }
+}
+
+void cmd_pd_set_i(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    bool err = false;
+    if (argc != 1) {
+        shellUsage(chp, "pd_set_i current_in_mA");
+        return;
+    }
+
+    char *endptr;
+    uint16_t current = strtol(argv[0], &endptr, 0);
+
+    if(endptr <= argv[0]){
+        err = true;
+    }else{
+        err = !usbPDControllerSetFixedCurrent(current);
+    }
+
+    if(err){
+        chprintf(chp, "Invalid current\r\n");
+    }
+    
+}
+
+void cmd_pd_hv_prefered(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    if (argc != 1) {
+        shellUsage(chp, "pd_hv_prefered 1|0 or without arg to show the actual setting");
+        chprintf(chp, "Actual setting for HV prefered : %s\r\n",usbPDControllerGetHVPrefered() ? "enabled" : "disabled");
+        return;
+    }
+    
+    uint8_t enable = (char)*argv[0]-'0';
+    usbPDControllerSetHVPrefered(enable);
+    
+}
+
+void cmd_pd_get_contract(BaseSequentialStream *chp, int argc, char *argv[])
+{
+    (void) argv;
+    if (argc > 0) {
+        shellUsage(chp, "pd_get_contract");
+        return;
+    }
+
+    chprintf(chp, "Do we have a contract ? : %s \r\n", usbPDControllerIsContract() ? "yes" : "no");
+    uint16_t voltage = usbPDControllerGetNegociatedVoltage();
+    chprintf(chp, "Actual voltage : %d.%03d V\r\n", voltage/1000, voltage%1000);
 }
 

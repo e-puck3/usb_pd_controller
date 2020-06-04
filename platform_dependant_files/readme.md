@@ -23,3 +23,48 @@ In order to use it, you need to :
 	-	``$(ALLINC)`` 	to 	``INCDIR``
 - Copy the **device_policy_manager.c/.h** and **usb_pd_controller.c/.h** files to your project and don't forget to include them in your makefile. These files are platform dependant so you will have to change some settings. The high level functions are located in the **usb_pd_controller.c/.h** files.
 - Finally, include **usb_pd_controller.h** in your C code in order to use the library.
+
+Shell commands
+--------------
+
+###Hot to add the commands to the shell
+
+Add ``USB_PD_CONTROLLER_SHELL_CMD`` inside the ``ShellCommand`` array.
+
+For example the following ``ShellCommand`` array : 
+
+```c
+...
+static const ShellCommand commands[] = {
+  {"mem", cmd_mem},
+  {"threads", cmd_threads},
+  {"test", cmd_test},
+  {"write", cmd_write},
+  {NULL, NULL}
+};
+...
+```
+Would become :
+
+```c
+...
+static const ShellCommand commands[] = {
+  {"mem", cmd_mem},
+  {"threads", cmd_threads},
+  {"test", cmd_test},
+  {"write", cmd_write},
+  USB_PD_CONTROLLER_SHELL_CMD
+  {NULL, NULL}
+};
+...
+```
+### Command list
+The following commands are provided to the shell with ``USB_PD_CONTROLLER_SHELL_CMD`` :
+
+- ``pd_get_source_cap`` : Prints the source capabilities
+- ``pd_get_cfg`` : Prints the actual config
+- ``pd_set_v`` : Sets the wanted voltage
+- ``pd_set_vrange`` : Sets the wanted voltage range
+- ``pd_set_i`` : Sets the current wanted
+- ``pd_hv_prefered`` : Sets the hv_prefered setting
+- ``pd_get_contract`` : Prints if a contract is made and the actual voltage
