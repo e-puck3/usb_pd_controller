@@ -87,7 +87,7 @@ static THD_FUNCTION(IntNPoll, vcfg) {
             }
 
         }
-        chThdSleepMilliseconds(1);
+        chThdSleepMilliseconds(5);
     }
 }
 
