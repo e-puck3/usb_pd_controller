@@ -22,7 +22,7 @@
 #include <ch.h>
 
 /* PD Buddy thread priorities */
-#define PDB_PRIO_PE (NORMALPRIO - 1)
+#define PDB_PRIO_PE (NORMALPRIO + 10)
 #define PDB_PRIO_PRL (PDB_PRIO_PE - 1)
 #define PDB_PRIO_PRL_INT_N (PDB_PRIO_PRL - 1)
 
